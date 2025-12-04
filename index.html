@@ -439,7 +439,7 @@
             display: none;
         }
 
-        /* Para ALBAMIX-COIL / Terniun / Orden: ocultar Nombre de Producto y Volumen */
+        /* Para ALBAMIX-COIL / Ternium / Orden: ocultar Nombre de Producto y Volumen */
         .main-card.tipo-excel th.col-nombre-de-producto,
         .main-card.tipo-excel td.col-nombre-de-producto,
         .main-card.tipo-excel th.col-volumen,
@@ -697,7 +697,7 @@
                 <button class="tab-btn" data-tipo="ALBAMIX-COIL">ALBAMIX-COIL</button>
                 <button class="tab-btn" data-tipo="Puerto">Puerto</button>
                 <button class="tab-btn" data-tipo="Macavi">Macavi</button>
-                <button class="tab-btn" data-tipo="Terniun">Terniun</button>
+                <button class="tab-btn" data-tipo="Ternium">Ternium</button>
                 <button class="tab-btn" data-tipo="Orden de retiro">Orden de retiro</button>
                 <!-- NUEVO -->
                 <button class="tab-btn" data-tipo="Entrega">Entrega</button>
@@ -723,7 +723,7 @@
                 </div>
             </div>
 
-            <!-- PANEL EXCEL: ALBAMIX-COIL / Terniun / Orden de retiro -->
+            <!-- PANEL EXCEL: ALBAMIX-COIL / Ternium / Orden de retiro -->
             <div id="panelExcel" style="display:none; margin-top:10px;">
                 <div class="form-row">
                     <div class="field">
@@ -738,7 +738,7 @@
 
                 <div class="form-row">
                     <div class="field" style="flex:1;">
-                        <label>Archivos Excel (ALBA / Terniun / Orden)</label>
+                        <label>Archivos Excel (ALBA / Ternium / Orden)</label>
                         <div class="drop-area" id="dropArea">
                             📂 Soltá aquí uno o varios Excel o hacé clic
                             <span class="hint">Se omiten filas de totales automáticamente.</span>
@@ -820,7 +820,7 @@
         const SESSION_GRACE_MS = 5000; // margen por si el server expira un toque antes
 
         const SIMPLE_TYPES = ["Shuttle", "Puerto", "Macavi"];
-        const EXCEL_TYPES = ["ALBAMIX-COIL", "Terniun", "Orden de retiro", "Entrega"];
+        const EXCEL_TYPES = ["ALBAMIX-COIL", "Ternium", "Orden de retiro", "Entrega"];
 
 
         // Shipment al final para los tipos de Excel
@@ -842,7 +842,7 @@
                 "Cod. Destino", "Cód. Tarifa", "LT/KG/UN", "Volumen",
                 "Tipos despacho", "Fecha pedido", "FECHA DE REPARTO", "RUTA", "Shipment"
             ],
-            "Terniun": [
+            "Ternium": [
                 "Remito/OC", "SKU", "Nombre de Producto", "CANTIDAD",
                 "Cod. Destino", "Cód. Tarifa", "LT/KG/UN", "Volumen",
                 "Tipos despacho", "Fecha pedido", "FECHA DE REPARTO", "RUTA", "Shipment"
@@ -1229,7 +1229,7 @@
                 subtituloTipo.innerHTML =
                     `se carga desde Excel descargdo en SAP, tipo de entrega SPOT.` +
                      ` <span class="pill">Shipment obligatorio (<strong>Serie-BU</strong>)</span>`;
-            } else if (tipo === "Terniun") {
+            } else if (tipo === "Ternium") {
                 subtituloTipo.innerHTML =
                     `se carga desde Excel descargdo en SAP, tipo de entrega SPOT.` +
                     ` <span class="pill">Shipment obligatorio (<strong>Serie-BU</strong>)</span>`;
@@ -1541,7 +1541,7 @@
 
         async function importExcelForCurrentTipo() {
             if (!EXCEL_TYPES.includes(currentTipo)) {
-                alert(`La importación de Excel es para ALBAMIX-COIL, Terniun y Orden de retiro.`);
+                alert(`La importación de Excel es para ALBAMIX-COIL, Ternium y Orden de retiro.`);
                 return;
             }
 
