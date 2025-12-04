@@ -1,0 +1,1666 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Creador de viajes – Shuttle & otros</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-soft: #020617;
+      --panel: #0b1120;
+      --panel-soft: #111827;
+      --border: #1f2937;
+      --accent: #3b82f6;
+      --accent-soft: #2563eb;
+      --accent-strong: #60a5fa;
+      --danger: #ef4444;
+      --danger-soft: #b91c1c;
+      --success: #22c55e;
+      --success-soft: #16a34a;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --muted-soft: #6b7280;
+      --shadow-lg: 0 24px 65px rgba(0, 0, 0, 0.6);
+      --radius-lg: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 18px;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, #1d283a, #020617 55%),
+        radial-gradient(circle at bottom right, #020617, #000000 70%);
+      color: var(--text);
+      transition: filter 0.15s ease;
+    }
+
+    body.locked {
+      overflow: hidden;
+    }
+
+    #appRoot.app-blurred {
+      filter: blur(4px) brightness(0.8);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    h1 {
+      margin: 0 0 4px 0;
+      font-size: 1.7rem;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h1 span.logo-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0, #93c5fd, #1d4ed8);
+      color: #0b1120;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4);
+    }
+
+    .subtitle {
+      margin: 0 0 16px 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .main-card {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(30, 64, 175, 0.7);
+      box-shadow: var(--shadow-lg);
+      padding: 18px 20px 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0 0, rgba(37, 99, 235, 0.09), transparent 60%),
+        radial-gradient(circle at 100% 100%, rgba(30, 64, 175, 0.12), transparent 60%);
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .main-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .top-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 18px;
+      align-items: center;
+    }
+
+    .env-select {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+
+    .env-select span.badge-env {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(22, 163, 74, 0.15);
+      color: #bbf7d0;
+      border: 1px solid rgba(22, 163, 74, 0.7);
+    }
+
+    .env-select select {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--panel-soft);
+      color: var(--text);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .env-select select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.5);
+    }
+
+    .tabs {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.98));
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      margin-bottom: 10px;
+    }
+
+    .tab-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted-soft);
+      transition: background 0.12s ease, color 0.12s ease, transform 0.08s ease, box-shadow 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--accent-strong);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #f9fafb;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.45);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      min-width: 160px;
+      flex: 1 1 0;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .field input,
+    .field select {
+      padding: 7px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #020617, #020617);
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.5);
+      background: #020617;
+    }
+
+    .field input[type="file"] {
+      padding: 4px 6px;
+      background: transparent;
+    }
+
+    .buttons-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease, filter 0.08s ease;
+      white-space: nowrap;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #f9fafb;
+      box-shadow: 0 12px 26px rgba(37, 99, 235, 0.4);
+    }
+
+    button.secondary {
+      background: rgba(31, 41, 55, 0.95);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button.danger {
+      background: linear-gradient(135deg, var(--danger), var(--danger-soft));
+      color: #fef2f2;
+      box-shadow: 0 10px 22px rgba(248, 113, 113, 0.35);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: none;
+      filter: brightness(0.97);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--muted);
+      margin-left: 6px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+
+    .pill strong {
+      color: var(--accent-strong);
+    }
+
+    .table-wrap {
+      margin-top: 12px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: radial-gradient(circle at top, #020617, #020617);
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead {
+      background: radial-gradient(circle at top, #020617, #020617);
+    }
+
+    thead th {
+      text-align: left;
+      padding: 7px 9px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      background: #020617;
+      z-index: 1;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    tbody tr:hover {
+      background: linear-gradient(90deg, rgba(30, 64, 175, 0.25), rgba(15, 23, 42, 0.99));
+    }
+
+    td {
+      padding: 4px 6px;
+      border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+    }
+
+    td input,
+    td select {
+      width: 100%;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      padding: 3px 4px;
+      color: var(--text);
+      font-size: 0.8rem;
+      outline: none;
+      transition: border-color 0.12s ease, background 0.12s ease;
+    }
+
+    td input:focus,
+    td select:focus {
+      outline: 1px solid var(--accent);
+      background: #020617;
+      border-color: var(--accent);
+    }
+
+    td.actions-cell {
+      text-align: center;
+      width: 42px;
+      white-space: nowrap;
+    }
+
+    td.error input,
+    td.error select {
+      border-color: var(--danger) !important;
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    .log {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 9px;
+      padding: 7px 9px;
+      border: 1px dashed rgba(75, 85, 99, 0.85);
+      max-height: 180px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    /* Panel Excel: zona drop */
+    .drop-area {
+      border: 1px dashed rgba(75, 85, 99, 0.95);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.8rem;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .drop-area span.hint {
+      font-size: 0.7rem;
+      color: var(--muted-soft);
+    }
+
+    .drop-area.dragover {
+      border-color: var(--accent);
+      background: radial-gradient(circle at top, rgba(37, 99, 235, 0.25), rgba(15, 23, 42, 0.98));
+      color: var(--text);
+    }
+
+    /* Ocultar columnas según tipo */
+
+    /* Para Shuttle / Puerto / Macavi: ocultar SKU, Descrip, CANTIDAD, LT/KG/UN */
+    .main-card.tipo-simple th.col-sku,
+    .main-card.tipo-simple td.col-sku,
+    .main-card.tipo-simple th.col-descrip,
+    .main-card.tipo-simple td.col-descrip,
+    .main-card.tipo-simple th.col-cantidad,
+    .main-card.tipo-simple td.col-cantidad,
+    .main-card.tipo-simple th.col-lt-kg-un,
+    .main-card.tipo-simple td.col-lt-kg-un {
+      display: none;
+    }
+
+    /* Para ALBA-COIL / Terniun / Orden: ocultar Nombre de Producto y Volumen */
+    .main-card.tipo-excel th.col-nombre-de-producto,
+    .main-card.tipo-excel td.col-nombre-de-producto,
+    .main-card.tipo-excel th.col-volumen,
+    .main-card.tipo-excel td.col-volumen {
+      display: none;
+    }
+
+    /* Toasts */
+    .toast-container {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9999;
+    }
+
+    .toast {
+      min-width: 260px;
+      max-width: 340px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      border: 1px solid transparent;
+      opacity: 0;
+      transform: translateY(6px);
+      animation: toast-in 0.18s ease-out forwards;
+    }
+
+    .toast-icon {
+      font-size: 1rem;
+      margin-top: 1px;
+    }
+
+    .toast-message {
+      flex: 1;
+      white-space: pre-line;
+    }
+
+    .toast-success {
+      background: radial-gradient(circle at top left, rgba(22, 163, 74, 0.18), #064e3b);
+      border-color: rgba(34, 197, 94, 0.7);
+      color: #bbf7d0;
+    }
+
+    .toast-error {
+      background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.18), #7f1d1d);
+      border-color: rgba(248, 113, 113, 0.8);
+      color: #fee2e2;
+    }
+
+    .toast-info {
+      background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), #1e293b);
+      border-color: rgba(96, 165, 250, 0.8);
+      color: #dbeafe;
+    }
+
+    .toast-close {
+      border: none;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font-size: 0.8rem;
+      padding: 0;
+      margin-left: 4px;
+      opacity: 0.8;
+    }
+
+    .toast-close:hover {
+      opacity: 1;
+    }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes toast-out {
+      from { opacity: 1; transform: translateY(0); }
+      to   { opacity: 0; transform: translateY(6px); }
+    }
+
+    /* LOGIN OVERLAY */
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .login-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .login-modal {
+      width: 100%;
+      max-width: 420px;
+      background: radial-gradient(circle at top, #020617, #020617);
+      border-radius: 18px;
+      border: 1px solid rgba(37, 99, 235, 0.8);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.8);
+      padding: 18px 20px 16px;
+      position: relative;
+    }
+
+    .login-modal-title {
+      font-size: 1.1rem;
+      margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .login-modal-title span.dot {
+      display: inline-flex;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+    }
+
+    .login-modal-sub {
+      margin: 0 0 12px 0;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .login-modal form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .login-modal .field label {
+      font-size: 0.78rem;
+      margin-bottom: 3px;
+    }
+
+    .login-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--muted-soft);
+      margin-top: 4px;
+    }
+
+    .login-error {
+      font-size: 0.75rem;
+      color: #fecaca;
+      min-height: 16px;
+    }
+
+    .login-modal .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .login-modal button.small {
+      padding-inline: 12px;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      .main-card {
+        padding: 12px;
+      }
+      .env-select {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .toast-container {
+        left: 10px;
+        right: 10px;
+        align-items: stretch;
+      }
+      .toast {
+        width: 100%;
+        max-width: none;
+      }
+    }
+  </style>
+
+  <!-- Librería para leer Excel en el navegador -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div id="appRoot">
+  <div class="main-card tipo-simple" id="mainCard">
+    <div class="top-row">
+      <div>
+        <h1 id="tituloTipo">
+          <span class="logo-pill" style="display: none;"></span>
+          Shuttle & otros – Generador de viajes
+        </h1>
+        <p class="subtitle" id="subtituloTipo">
+          Genera las filas para Shuttle (2 filas por viaje), edita y envía a Google Sheets / SLI.
+          <span class="pill">Hoja destino: <strong>ListadoShuttle</strong></span>
+        </p>
+      </div>
+      <div class="env-select">
+        <span>Entorno SLI</span>
+        <span class="badge-env" id="envBadge">prod</span>
+        <select id="entornoSelect">
+          <option value="">prod</option>
+          <option value="qa/">qa</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tabs de tipo de viaje -->
+    <div class="tabs" id="tabsTipos">
+      <button class="tab-btn active" data-tipo="Shuttle">Shuttle</button>
+      <button class="tab-btn" data-tipo="ALBA-COIL">ALBA-COIL</button>
+      <button class="tab-btn" data-tipo="Puerto">Puerto</button>
+      <button class="tab-btn" data-tipo="Macavi">Macavi</button>
+      <button class="tab-btn" data-tipo="Terniun">Terniun</button>
+      <button class="tab-btn" data-tipo="Orden de retiro">Orden de retiro</button>
+    </div>
+
+    <!-- PANEL SIMPLE: Shuttle / Puerto / Macavi -->
+    <div id="panelSimple">
+      <div class="form-row" style="margin-top:12px;">
+        <div class="field">
+          <label for="viajesInput">Cantidad de viajes</label>
+          <input type="number" id="viajesInput" min="1" step="1" value="1">
+        </div>
+        <div class="field">
+          <label for="fechaInput">Fecha de reparto (dd/mm/aaaa)</label>
+          <input type="text" id="fechaInput" placeholder="dd/mm/aaaa">
+        </div>
+      </div>
+      <div class="buttons-row">
+        <button class="primary" id="btnGenerarSimple">➕ Generar viajes</button>
+        <button class="danger" id="btnBorrarSimple">🗑 Limpiar tabla</button>
+        <button class="primary" id="btnEnviarSimple">📤 Cargar AppLog</button>
+      </div>
+    </div>
+
+    <!-- PANEL EXCEL: ALBA-COIL / Terniun / Orden de retiro -->
+    <div id="panelExcel" style="display:none; margin-top:10px;">
+      <div class="form-row">
+        <div class="field">
+          <label for="fechaRepartoExcel">Fecha reparto (dd/mm/aaaa)</label>
+          <input type="text" id="fechaRepartoExcel" placeholder="dd/mm/aaaa">
+        </div>
+        <div class="field">
+          <label for="fechaPedidoExcel">Fecha pedido (dd/mm/aaaa)</label>
+          <input type="text" id="fechaPedidoExcel" placeholder="dd/mm/aaaa">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field" style="flex:1;">
+          <label>Archivos Excel (ALBA / Terniun / Orden)</label>
+          <div class="drop-area" id="dropArea">
+            📂 Soltá aquí uno o varios Excel o hacé clic
+            <span class="hint">Se omiten filas de totales automáticamente.</span>
+          </div>
+          <input type="file" id="excelInput" accept=".xls,.xlsx,.xlsm" multiple style="display:none;">
+        </div>
+        <button class="secondary" id="btnCargarExcel" type="button" style="margin-top:18px;">
+          📥 Procesar Excel
+        </button>
+      </div>
+
+      <div class="buttons-row">
+        <button class="secondary" id="btnAgregarFilaVacia" style="display: none;">➕ Agregar fila vacía</button>
+        <button class="danger" id="btnBorrarExcel">🗑 Limpiar tabla</button>
+        <button class="primary" id="btnEnviarExcel">📤 Cargar AppLog</button>
+      </div>
+    </div>
+
+    <!-- Tabla de datos -->
+    <div class="table-wrap">
+      <table id="tablaShuttle">
+        <thead>
+          <tr id="tablaHeaderRow"></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Log -->
+    <div class="log" id="logArea">
+      Listo para generar viajes Shuttle…
+    </div>
+  </div>
+</div>
+
+<!-- Contenedor de toasts -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay open" id="loginOverlay">
+  <div class="login-modal">
+    <h2 class="login-modal-title">
+      <span class="dot"></span>
+      Iniciar sesión en SLI
+    </h2>
+    <p class="login-modal-sub" id="loginReason">
+      Ingresá con tu usuario de SLI para crear viajes. La sesión se mantiene por 10 minutos.
+    </p>
+
+    <form id="loginForm">
+      <div class="field">
+        <label for="loginUser">Usuario SLI</label>
+        <input type="text" id="loginUser" autocomplete="username" placeholder="ej: lalfonso" value="lalfonso">
+      </div>
+      <div class="field">
+        <label for="loginPass">Contraseña</label>
+        <input type="password" id="loginPass" autocomplete="current-password" placeholder="Contraseña">
+      </div>
+    </form>
+
+    <div class="login-error" id="loginError"></div>
+
+    <div class="login-footer">
+      <span>Entorno actual: <strong id="loginEnvLabel">prod</strong></span>
+      <div class="btn-row">
+        <button type="button" class="secondary small" id="btnLoginCancelar">Salir</button>
+        <button type="button" class="primary small" id="btnLoginSubmit">Iniciar sesión</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  /***** CONFIG FRONT *****/
+  const API_URL = "https://script.google.com/macros/s/AKfycbx5YByLCJLa5KfexadCG2Tjp_o0cttSklP8BfLHPopCAivBdAJco88-ts-YmIn9Bujz/exec";
+  const SHEET_DESTINO = "ListadoShuttle";
+  const SESSION_STORAGE_KEY = "sliSessionV1";
+  const SESSION_GRACE_MS = 5000; // margen por si el server expira un toque antes
+
+  const SIMPLE_TYPES = ["Shuttle", "Puerto", "Macavi"];
+  const EXCEL_TYPES  = ["ALBA-COIL", "Terniun", "Orden de retiro"];
+
+  // Shipment al final para los tipos de Excel
+  const HEADERS_CONFIG = {
+    "Shuttle": [
+      "SKU","Descrip","CANTIDAD","Cod. Destino","Fecha entrega",
+      "Tipos despacho","Remito/OC","LT/KG/UN","RUTA","FECHA DE REPARTO"
+    ],
+    "Puerto": [
+      "SKU","Descrip","CANTIDAD","Cod. Destino","Fecha entrega",
+      "Tipos despacho","Remito/OC","LT/KG/UN","RUTA","FECHA DE REPARTO"
+    ],
+    "Macavi": [
+      "SKU","Descrip","CANTIDAD","Cod. Destino","Fecha entrega",
+      "Tipos despacho","Remito/OC","LT/KG/UN","RUTA","FECHA DE REPARTO"
+    ],
+    "ALBA-COIL": [
+      "Remito/OC","SKU","Nombre de Producto","CANTIDAD",
+      "Cod. Destino","Cód. Tarifa","LT/KG/UN","Volumen",
+      "Tipos despacho","Fecha pedido","FECHA DE REPARTO","RUTA","Shipment"
+    ],
+    "Terniun": [
+      "Remito/OC","SKU","Nombre de Producto","CANTIDAD",
+      "Cod. Destino","Cód. Tarifa","LT/KG/UN","Volumen",
+      "Tipos despacho","Fecha pedido","FECHA DE REPARTO","RUTA","Shipment"
+    ],
+    "Orden de retiro": [
+      "Remito/OC","SKU","Nombre de Producto","CANTIDAD",
+      "Cod. Destino","Cód. Tarifa","LT/KG/UN","Volumen",
+      "Tipos despacho","Fecha pedido","FECHA DE REPARTO","RUTA","Shipment"
+    ]
+  };
+
+  let currentTipo = "Shuttle";
+  let HEADERS = HEADERS_CONFIG[currentTipo];
+
+  const tbody         = document.querySelector("#tablaShuttle tbody");
+  const headerRowEl   = document.getElementById("tablaHeaderRow");
+  const logArea       = document.getElementById("logArea");
+  const tituloTipo    = document.getElementById("tituloTipo");
+  const subtituloTipo = document.getElementById("subtituloTipo");
+  const panelSimple   = document.getElementById("panelSimple");
+  const panelExcel    = document.getElementById("panelExcel");
+  const mainCard      = document.getElementById("mainCard");
+  const envSelect     = document.getElementById("entornoSelect");
+  const envBadge      = document.getElementById("envBadge");
+  const toastContainer = document.getElementById("toastContainer");
+  const appRoot       = document.getElementById("appRoot");
+
+  // Login elements
+  const loginOverlay   = document.getElementById("loginOverlay");
+  const loginEnvLabel  = document.getElementById("loginEnvLabel");
+  const loginForm      = document.getElementById("loginForm");
+  const loginUserInput = document.getElementById("loginUser");
+  const loginPassInput = document.getElementById("loginPass");
+  const loginErrorEl   = document.getElementById("loginError");
+  const loginReasonEl  = document.getElementById("loginReason");
+  const btnLoginSubmit = document.getElementById("btnLoginSubmit");
+  const btnLoginCancel = document.getElementById("btnLoginCancelar");
+
+  // Estado de sesión en front
+  let currentSessionId = null;
+  let sessionExpiresAt = 0;
+
+  function log(msg) {
+    const now = new Date().toLocaleTimeString("es-AR", { hour12: false });
+    logArea.textContent = `[${now}] ${msg}\n` + logArea.textContent;
+  }
+
+  /* Toasts */
+  function showToast(message, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+
+    const icon = document.createElement("div");
+    icon.className = "toast-icon";
+    icon.textContent =
+      type === "success" ? "✔" :
+      type === "error"   ? "⚠" : "ℹ";
+
+    const msgDiv = document.createElement("div");
+    msgDiv.className = "toast-message";
+    msgDiv.textContent = message;
+
+    const btnClose = document.createElement("button");
+    btnClose.className = "toast-close";
+    btnClose.textContent = "✕";
+    btnClose.onclick = () => hideToast(toast);
+
+    toast.appendChild(icon);
+    toast.appendChild(msgDiv);
+    toast.appendChild(btnClose);
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => hideToast(toast), 6000);
+  }
+
+  function hideToast(toast) {
+    toast.style.animation = "toast-out 0.18s ease-in forwards";
+    setTimeout(() => toast.remove(), 180);
+  }
+
+  /* Sesión front */
+
+  function isSessionValid() {
+    if (!currentSessionId) return false;
+    return Date.now() + SESSION_GRACE_MS < sessionExpiresAt;
+  }
+
+  function saveSessionToStorage() {
+    if (!currentSessionId || !sessionExpiresAt) return;
+    try {
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+        sessionId: currentSessionId,
+        expiresAt: sessionExpiresAt
+      }));
+    } catch (_) {}
+  }
+
+  function loadSessionFromStorage() {
+    try {
+      const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (!data || !data.sessionId || !data.expiresAt) return;
+      if (Date.now() >= data.expiresAt) {
+        clearSession();
+        return;
+      }
+      currentSessionId = data.sessionId;
+      sessionExpiresAt = data.expiresAt;
+      unlockApp();
+      log("Sesión SLI recuperada desde el navegador.");
+      showToast("Sesión SLI activa desde esta ventana.", "success");
+    } catch (_) {
+      clearSession();
+    }
+  }
+
+  function clearSession() {
+    currentSessionId = null;
+    sessionExpiresAt = 0;
+    try { localStorage.removeItem(SESSION_STORAGE_KEY); } catch (_) {}
+    lockApp("La sesión SLI expiró o no existe. Volvé a iniciar sesión.");
+  }
+
+  /* Lock / Unlock UI */
+
+  function lockApp(reasonText) {
+    if (reasonText) {
+      loginReasonEl.textContent = reasonText;
+    } else {
+      loginReasonEl.textContent = "Ingresá con tu usuario de SLI para crear viajes. La sesión se mantiene por 10 minutos.";
+    }
+    document.body.classList.add("locked");
+    appRoot.classList.add("app-blurred");
+    loginOverlay.classList.add("open");
+    loginErrorEl.textContent = "";
+    loginPassInput.value = "";
+    loginUserInput.focus();
+  }
+
+  function unlockApp() {
+    document.body.classList.remove("locked");
+    appRoot.classList.remove("app-blurred");
+    loginOverlay.classList.remove("open");
+  }
+
+  /* Login */
+
+  async function handleLogin() {
+    const user = loginUserInput.value.trim();
+    const pass = loginPassInput.value;
+    const entorno = envSelect.value || "";
+
+    if (!user || !pass) {
+      loginErrorEl.textContent = "Completá usuario y contraseña.";
+      return;
+    }
+
+    btnLoginSubmit.disabled = true;
+    btnLoginSubmit.textContent = "Ingresando…";
+    loginErrorEl.textContent = "";
+
+    try {
+      const payload = {
+        action: "login",
+        username: user,
+        password: pass,
+        entorno
+      };
+
+      const bodyParams = new URLSearchParams();
+      bodyParams.append("payload", JSON.stringify(payload));
+
+      const resp = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: bodyParams.toString()
+      });
+
+      const text = await resp.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch (_) {}
+
+      if (!data || !data.ok) {
+        const msg = (data && data.error) ? data.error : "No se pudo iniciar sesión.";
+        loginErrorEl.textContent = msg;
+        showToast("Error al iniciar sesión SLI:\n" + msg, "error");
+        log("❌ Login SLI fallido: " + msg);
+        return;
+      }
+
+      currentSessionId = data.sessionId;
+      const ttl = (data.expiresIn || 600) * 1000;
+      sessionExpiresAt = Date.now() + ttl;
+      saveSessionToStorage();
+      unlockApp();
+
+      log("✅ Sesión SLI iniciada. SessionId=" + currentSessionId);
+      showToast("Sesión SLI iniciada. Vence en ~10 minutos.", "success");
+
+    } catch (err) {
+      loginErrorEl.textContent = "Error de red o servidor.";
+      showToast("Error de red al iniciar sesión:\n" + err.message, "error");
+      log("❌ Error de red en login: " + err.message);
+    } finally {
+      btnLoginSubmit.disabled = false;
+      btnLoginSubmit.textContent = "Iniciar sesión";
+    }
+  }
+
+  /* Helpers tabla */
+
+  function headerToClass(h) {
+    let slug = h.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    return "col-" + slug;
+  }
+
+  function rebuildTableHeader() {
+    headerRowEl.innerHTML = "";
+    HEADERS.forEach(h => {
+      const th = document.createElement("th");
+      th.textContent = h;
+      th.classList.add(headerToClass(h));
+      headerRowEl.appendChild(th);
+    });
+    const thAcc = document.createElement("th");
+    thAcc.textContent = "Acciones";
+    headerRowEl.appendChild(thAcc);
+  }
+
+  function parseDMY(text) {
+    if (!text) return null;
+    const m = text.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return null;
+    const d = parseInt(m[1], 10);
+    const mo = parseInt(m[2], 10);
+    const y = parseInt(m[3], 10);
+    const date = new Date(y, mo - 1, d);
+    if (date.getFullYear() !== y || date.getMonth() !== mo - 1 || date.getDate() !== d) return null;
+    return date;
+  }
+
+  function formatDateDMY(date) {
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = String(date.getFullYear());
+    return `${d}/${m}/${y}`;
+  }
+
+  function formatDateDDMMYYYY(date) {
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = String(date.getFullYear());
+    return `${d}${m}${y}`;
+  }
+
+  function clearTable() {
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+  }
+
+  function clearValidationErrors() {
+    document.querySelectorAll("td.error").forEach(td => td.classList.remove("error"));
+  }
+
+  function createRow(initialData = {}, placeholderData = {}) {
+    const tr = document.createElement("tr");
+
+    HEADERS.forEach(header => {
+      const td = document.createElement("td");
+      td.classList.add(headerToClass(header));
+
+      let control;
+      if (header === "RUTA" && EXCEL_TYPES.includes(currentTipo)) {
+        const select = document.createElement("select");
+        ["", "RUTA 13", "RUTA 14", "RUTA 15"].forEach(val => {
+          const opt = document.createElement("option");
+          opt.value = val;
+          opt.textContent = val;
+          select.appendChild(opt);
+        });
+        const value = initialData[header] ?? "RUTA 13";
+        select.value = value;
+        control = select;
+      } else {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = initialData[header] ?? "";
+        if (placeholderData[header]) input.placeholder = placeholderData[header];
+        control = input;
+      }
+
+      td.appendChild(control);
+      tr.appendChild(td);
+    });
+
+    const tdActions = document.createElement("td");
+    tdActions.className = "actions-cell";
+    const btnDel = document.createElement("button");
+    btnDel.className = "danger";
+    btnDel.type = "button";
+    btnDel.textContent = "✖";
+    btnDel.title = "Eliminar fila";
+    btnDel.addEventListener("click", () => tr.remove());
+    tdActions.appendChild(btnDel);
+    tr.appendChild(tdActions);
+    tbody.appendChild(tr);
+  }
+
+  function togglePanels() {
+    if (SIMPLE_TYPES.includes(currentTipo)) {
+      panelSimple.style.display = "block";
+      panelExcel.style.display = "none";
+      mainCard.classList.add("tipo-simple");
+      mainCard.classList.remove("tipo-excel");
+    } else {
+      panelSimple.style.display = "none";
+      panelExcel.style.display = "block";
+      mainCard.classList.remove("tipo-simple");
+      mainCard.classList.add("tipo-excel");
+    }
+  }
+
+  function updateEnvBadge() {
+    const val = envSelect.value;
+    const isQa = (val === "qa/");
+    envBadge.textContent = isQa ? "qa" : "prod";
+    envBadge.style.background =
+      isQa ? "rgba(202, 138, 4, 0.15)" : "rgba(22, 163, 74, 0.15)";
+    envBadge.style.borderColor =
+      isQa ? "rgba(234, 179, 8, 0.8)" : "rgba(22, 163, 74, 0.7)";
+    loginEnvLabel.textContent = isQa ? "qa" : "prod";
+  }
+
+  function setTipo(tipo) {
+    currentTipo = tipo;
+    HEADERS = HEADERS_CONFIG[tipo];
+    if (!HEADERS) {
+      alert("Tipo no configurado: " + tipo);
+      return;
+    }
+
+    tituloTipo.textContent = `${tipo} – Generador de viajes`;
+
+    if (tipo === "Shuttle") {
+      subtituloTipo.innerHTML =
+        `Genera las filas para Shuttle (2 filas por viaje), edita y envía a Google Sheets / SLI.` +
+        ` <span class="pill">Hoja destino: <strong>ListadoShuttle</strong></span>`;
+    } else if (tipo === "Puerto") {
+      subtituloTipo.innerHTML =
+        `Puerto: igual que Shuttle, pero identificado como Puerto.` +
+        ` <span class="pill">Entrada manual por generación de viajes</span>`;
+    } else if (tipo === "Macavi") {
+      subtituloTipo.innerHTML =
+        `Macavi: cod. destino 274261 y tipo de entrega SPOT.` +
+        ` <span class="pill">Entrada manual por generación de viajes</span>`;
+    } else if (tipo === "ALBA-COIL") {
+      subtituloTipo.innerHTML =
+        `ALBA-COIL: se carga desde Excel, tipo de entrega SPOT.` +
+        ` <span class="pill">Shipment obligatorio (Serie-BU)</span>`;
+    } else if (tipo === "Terniun") {
+      subtituloTipo.innerHTML =
+        `Terniun: Excel, rutas por línea (RUTA 13–15), tipo de entrega SPOT.` +
+        ` <span class="pill">Shipment obligatorio (Serie-BU)</span>`;
+    } else if (tipo === "Orden de retiro") {
+      subtituloTipo.innerHTML =
+        `Orden de retiro: igual que Terniun pero tipo de entrega "Orden de retiro".` +
+        ` <span class="pill">Shipment obligatorio (Serie-BU)</span>`;
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.tipo === tipo);
+    });
+
+    clearTable();
+    rebuildTableHeader();
+    togglePanels();
+    log(`Cambiado a tipo: ${tipo}.`);
+  }
+
+  function generarViajes() {
+    if (!SIMPLE_TYPES.includes(currentTipo)) {
+      alert(`Para ${currentTipo} se usa el panel de Excel.`);
+      return;
+    }
+
+    const viajes = parseInt(document.getElementById("viajesInput").value, 10);
+    if (!(viajes >= 1)) {
+      alert("Ingrese una cantidad de viajes válida (>= 1).");
+      return;
+    }
+
+    const fechaStr = document.getElementById("fechaInput").value.trim();
+    const fecha = parseDMY(fechaStr);
+    if (!fecha) {
+      alert("Fecha inválida. Use el formato dd/mm/aaaa.");
+      return;
+    }
+
+    const fechaDMY = formatDateDMY(fecha);
+    const fechaDDMMYYYY = formatDateDDMMYYYY(fecha);
+
+    clearTable();
+
+    let remitoCounter = 1;
+    for (let i = 1; i <= viajes; i++) {
+      let rutaBase = `${currentTipo} ${i}`;
+      let tipoDespacho = "Shuttle";
+      let cod2 = "2";
+
+      if (currentTipo === "Puerto") {
+        tipoDespacho = "Puerto";
+        cod2 = "2";
+      } else if (currentTipo === "Macavi") {
+        tipoDespacho = "SPOT";
+        cod2 = "274261";
+      }
+
+      createRow({
+        "SKU": "",
+        "Descrip": "",
+        "CANTIDAD": "",
+        "Cod. Destino": cod2,
+        "Fecha entrega": fechaDMY,
+        "Tipos despacho": tipoDespacho,
+        "Remito/OC": `${remitoCounter}-${fechaDDMMYYYY}`,
+        "LT/KG/UN": "",
+        "RUTA": rutaBase,
+        "FECHA DE REPARTO": fechaDMY
+      });
+      remitoCounter++;
+
+      createRow({
+        "SKU": "",
+        "Descrip": "",
+        "CANTIDAD": "",
+        "Cod. Destino": "1",
+        "Fecha entrega": fechaDMY,
+        "Tipos despacho": tipoDespacho,
+        "Remito/OC": `${remitoCounter}-${fechaDDMMYYYY}`,
+        "LT/KG/UN": "",
+        "RUTA": rutaBase,
+        "FECHA DE REPARTO": fechaDMY
+      });
+      remitoCounter++;
+    }
+
+    log(`Listado generado (${currentTipo}): ${viajes * 2} filas (${viajes} viajes).`);
+    showToast(`Se generaron ${viajes} viaje(s) para ${currentTipo}.`, "info");
+  }
+
+  function addEmptyRow() {
+    const placeholders = {};
+    if (EXCEL_TYPES.includes(currentTipo) && HEADERS.includes("Shipment")) {
+      placeholders["Shipment"] = "Serie-BU";
+    }
+    createRow({}, placeholders);
+    log("Fila vacía agregada.");
+  }
+
+  function collectRowsForApi() {
+    const rows = [];
+    const trs = Array.from(tbody.querySelectorAll("tr"));
+
+    trs.forEach(tr => {
+      const fields = Array.from(tr.querySelectorAll("td input, td select"));
+      if (fields.length < HEADERS.length) return;
+
+      const rowObj = {};
+      let allEmpty = true;
+
+      HEADERS.forEach((header, idx) => {
+        const el = fields[idx];
+        const val = (el && el.value || "").trim();
+        if (val !== "") allEmpty = false;
+
+        if (header === "Fecha entrega" || header === "Fecha pedido" || header === "FECHA DE REPARTO") {
+          const parsed = parseDMY(val);
+          rowObj[header] = parsed ? formatDateDMY(parsed) : val;  // si está vacío, queda vacío
+        } else {
+          rowObj[header] = val;
+        }
+      });
+
+      if (!allEmpty) rows.push(rowObj);
+    });
+
+    return rows;
+  }
+
+  function importOneExcelFile(file, fr, fp, tipoEntrega) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const data = e.target.result;
+          const workbook = XLSX.read(data, { type: "binary" });
+          const firstSheetName = workbook.SheetNames[0];
+          const ws = workbook.Sheets[firstSheetName];
+          const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+
+          if (!rows || !rows.length) {
+            log(`Archivo ${file.name}: vacío.`);
+            resolve(0);
+            return;
+          }
+
+          const headerRow = rows[0].map(v => v != null ? String(v).trim() : "");
+          const idx = name => headerRow.indexOf(name);
+
+          const requiredNames = [
+            "Delivery","Material","Delivery quantity","Description",
+            "Ship-To Party","Route","Total Weight","Volume"
+          ];
+          const missing = requiredNames.filter(name => idx(name) === -1);
+          if (missing.length) {
+            alert(`Faltan columnas en el Excel (${file.name}):\n\n` + missing.join("\n"));
+            resolve(0);
+            return;
+          }
+
+          const iDelivery = idx("Delivery");
+          const iMaterial = idx("Material");
+          const iQty      = idx("Delivery quantity");
+          const iDesc     = idx("Description");
+          const iShipTo   = idx("Ship-To Party");
+          const iRoute    = idx("Route");
+          const iWeight   = idx("Total Weight");
+          const iVolume   = idx("Volume");
+
+          let added = 0;
+
+          for (let r = 1; r < rows.length; r++) {
+            const row = rows[r];
+            if (!row || row.length === 0) continue;
+
+            const val = ii => {
+              const cell = row[ii];
+              return cell == null ? "" : String(cell).trim();
+            };
+
+            const firstCell   = String(row[0] ?? "").trim().toLowerCase();
+            const deliveryVal = val(iDelivery);
+            const materialVal = val(iMaterial);
+            const qtyVal      = val(iQty);
+            const weightVal   = val(iWeight);
+            const volVal      = val(iVolume);
+
+            // 1) Filas que dicen "Total..." (en primera celda o en Delivery)
+            if (firstCell.startsWith("total") || deliveryVal.toLowerCase().startsWith("total")) continue;
+
+            // 2) Filas totalmente vacías
+            if (!deliveryVal && !materialVal && !qtyVal && !weightVal && !volVal) continue;
+
+            // 3) Filas de totales numéricos
+            if (!deliveryVal && !materialVal && (qtyVal || weightVal || volVal)) continue;
+
+            const rowData = {
+              "Remito/OC": deliveryVal,
+              "SKU": materialVal,
+              "Nombre de Producto": val(iDesc),
+              "CANTIDAD": qtyVal,
+              "Cod. Destino": val(iShipTo),
+              "Cód. Tarifa": val(iRoute),
+              "LT/KG/UN": weightVal,
+              "Volumen": volVal,
+              "Tipos despacho": tipoEntrega,
+              "Fecha pedido": fp,
+              "FECHA DE REPARTO": fr,
+              "RUTA": "RUTA 13",
+              "Shipment": ""
+            };
+
+            createRow(rowData, { "Shipment": "Serie-BU" });
+            added++;
+          }
+
+          log(`Archivo ${file.name}: filas cargadas ${added}.`);
+          resolve(added);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsBinaryString(file);
+    });
+  }
+
+  async function importExcelForCurrentTipo() {
+    if (!EXCEL_TYPES.includes(currentTipo)) {
+      alert(`La importación de Excel es para ALBA-COIL, Terniun y Orden de retiro.`);
+      return;
+    }
+
+    const excelInput = document.getElementById("excelInput");
+    const files = excelInput.files;
+    if (!files || !files.length) {
+      alert("Seleccioná o arrastrá uno o varios archivos Excel primero.");
+      return;
+    }
+
+    const fechaRepEl = document.getElementById("fechaRepartoExcel");
+    const fechaPedEl = document.getElementById("fechaPedidoExcel");
+    let fr = fechaRepEl.value.trim();
+    let fp = fechaPedEl.value.trim();
+    const todayStr = formatDateDMY(new Date());
+    if (!parseDMY(fr)) fr = todayStr;
+    if (!parseDMY(fp)) fp = todayStr;
+
+    const tipoEntrega = currentTipo === "Orden de retiro" ? "Orden de retiro" : "SPOT";
+
+    clearTable();
+
+    let totalAdded = 0;
+    for (let i = 0; i < files.length; i++) {
+      try {
+        const added = await importOneExcelFile(files[i], fr, fp, tipoEntrega);
+        totalAdded += added;
+      } catch (err) {
+        log(`Error leyendo ${files[i].name}: ${err.message}`);
+      }
+    }
+
+    log(`Importación completa para ${currentTipo}. Filas totales: ${totalAdded}.`);
+    if (totalAdded > 0) {
+      showToast(`Excel importado para ${currentTipo}.\nFilas cargadas: ${totalAdded}.`, "info");
+    }
+  }
+
+async function enviarAGoogleSheets() {
+  if (!isSessionValid()) {
+    showToast("Primero iniciá sesión en SLI para poder enviar.", "error");
+    lockApp("La sesión SLI no está activa. Iniciá sesión para continuar.");
+    return;
+  }
+
+  clearValidationErrors();
+
+  const remitoIndex   = HEADERS.indexOf("Remito/OC");
+  const shipmentIndex = HEADERS.indexOf("Shipment");
+
+  if (remitoIndex === -1) {
+    window.alert("No se encuentra la columna Remito/OC.");
+    return;
+  }
+
+  const trs = Array.from(tbody.querySelectorAll("tr"));
+  let hasInvalid = false;
+  let rowCount = 0;
+  const mensajes = [];
+
+  trs.forEach(tr => {
+    const fields = Array.from(tr.querySelectorAll("td input, td select"));
+    if (fields.length < HEADERS.length) return;
+
+    let rowEmpty = true;
+    HEADERS.forEach((header, i) => {
+      const el = fields[i];
+      const val = (el && el.value || "").trim();
+      if (val !== "") rowEmpty = false;
+    });
+    if (rowEmpty) return;
+
+    rowCount++;
+
+    const remitoEl = fields[remitoIndex];
+    const remitoVal = (remitoEl && remitoEl.value || "").trim();
+    if (!remitoVal) {
+      hasInvalid = true;
+      remitoEl.closest("td").classList.add("error");
+      mensajes.push(`Fila ${rowCount}: completar Remito/OC`);
+    }
+
+    if (EXCEL_TYPES.includes(currentTipo) && shipmentIndex !== -1) {
+      const shipEl = fields[shipmentIndex];
+      const shipVal = (shipEl && shipEl.value || "").trim();
+      if (!shipVal) {
+        hasInvalid = true;
+        shipEl.closest("td").classList.add("error");
+        mensajes.push(`Fila ${rowCount}: completar Shipment (Serie-BU)`);
+      }
+    }
+  });
+
+  if (hasInvalid) {
+    const msg = "No se puede enviar: faltan completar datos obligatorios.\n\n" + mensajes.join("\n");
+    log("❌ Validación: " + msg.replace(/\n/g, " | "));
+    showToast("Hay campos obligatorios sin completar.\nRevisá las filas marcadas en rojo.", "error");
+    window.alert(msg);
+    return;
+  }
+
+  const rows = collectRowsForApi();
+  if (rows.length === 0) {
+    showToast("No hay filas con datos para enviar.", "info");
+    window.alert("No hay filas con datos para enviar.");
+    return;
+  }
+
+  const entorno = envSelect.value || "";
+  const payload = {
+    sheet: SHEET_DESTINO,
+    tipo: currentTipo,
+    entorno,
+    sessionId: currentSessionId,
+    rows,
+    action: "alta"
+  };
+
+  log(`Enviando ${rows.length} filas (${currentTipo}) a GAS (entorno="${entorno || 'prod'}")…`);
+
+  try {
+    const bodyParams = new URLSearchParams();
+    bodyParams.append("payload", JSON.stringify(payload));
+
+    const resp = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+      body: bodyParams.toString()
+    });
+
+    const text = await resp.text();
+    let data = null;
+    try { data = JSON.parse(text); } catch (_) {}
+
+    if (!data || typeof data !== "object" || typeof data.ok === "undefined") {
+      log(`⚠️ Respuesta inesperada (${resp.status}): ${text}`);
+      showToast("Respuesta inesperada del servidor. Revisá el log.", "error");
+      window.alert("Respuesta inesperada del servidor. Revisá el log.");
+      return;
+    }
+
+    if (data.ok) {
+      log(`✅ OK SLI (${data.status}): ${data.response}`);
+      showToast("Viajes creados correctamente en SLI.", "success");
+      window.alert("Viajes creados correctamente en SLI.");
+      return;
+    }
+
+    if (data.error === "sessionExpired") {
+      clearSession();
+      showToast("La sesión SLI expiró. Volvé a iniciar sesión.", "error");
+      lockApp("La sesión SLI expiró. Iniciá sesión nuevamente para continuar.");
+      return;
+    }
+
+    let detalle = "";
+    if (typeof data.response === "string") {
+      detalle = data.response.replace(/<br\s*\/?>/gi, "\n").trim();
+    } else {
+      detalle = JSON.stringify(data.response);
+    }
+
+    log(`❌ Error SLI (${data.status}):\n${detalle}`);
+    showToast(`SLI devolvió un error:\n${detalle}`, "error");
+    window.alert("SLI devolvió un error:\n\n" + detalle);
+
+  } catch (err) {
+    log("❌ Error de red/JS: " + err.message);
+    showToast("Error de red/JS. Revisá el log.", "error");
+    window.alert("Error de red/JS. Revisá el log.\n\n" + err.message);
+  }
+}
+
+  // Eventos panel simple
+  document.getElementById("btnGenerarSimple").addEventListener("click", generarViajes);
+  document.getElementById("btnBorrarSimple").addEventListener("click", () => {
+
+      clearTable();
+      log("Tabla limpiada.");
+
+  });
+  document.getElementById("btnEnviarSimple").addEventListener("click", enviarAGoogleSheets);
+
+  // Eventos panel Excel
+  document.getElementById("btnAgregarFilaVacia").addEventListener("click", addEmptyRow);
+  document.getElementById("btnBorrarExcel").addEventListener("click", () => {
+  
+      clearTable();
+      log("Tabla limpiada.");
+
+  });
+  document.getElementById("btnEnviarExcel").addEventListener("click", enviarAGoogleSheets);
+  document.getElementById("btnCargarExcel").addEventListener("click", importExcelForCurrentTipo);
+
+  // Tabs
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => setTipo(btn.dataset.tipo));
+  });
+
+  // Drag & drop Excel (múltiples archivos)
+  const dropArea = document.getElementById("dropArea");
+  const excelInput = document.getElementById("excelInput");
+  dropArea.addEventListener("click", () => excelInput.click());
+  dropArea.addEventListener("dragover", e => {
+    e.preventDefault();
+    dropArea.classList.add("dragover");
+  });
+  dropArea.addEventListener("dragleave", e => {
+    e.preventDefault();
+    dropArea.classList.remove("dragover");
+  });
+  dropArea.addEventListener("drop", e => {
+    e.preventDefault();
+    dropArea.classList.remove("dragover");
+    if (e.dataTransfer.files && e.dataTransfer.files.length) {
+      excelInput.files = e.dataTransfer.files;
+      log("Archivos Excel arrastrados: " + e.dataTransfer.files.length);
+    }
+  });
+
+  // Eventos login
+  btnLoginSubmit.addEventListener("click", handleLogin);
+  loginForm.addEventListener("submit", e => {
+    e.preventDefault();
+    handleLogin();
+  });
+  btnLoginCancel.addEventListener("click", () => {
+    showToast("Sin sesión SLI activa. No se podrán enviar viajes.", "info");
+  });
+
+  envSelect.addEventListener("change", updateEnvBadge);
+
+  // Init
+  (function initDefaults() {
+    const hoyStr = formatDateDMY(new Date());
+    document.getElementById("fechaInput").value = hoyStr;
+    document.getElementById("fechaRepartoExcel").value = hoyStr;
+    document.getElementById("fechaPedidoExcel").value = hoyStr;
+
+    HEADERS = HEADERS_CONFIG[currentTipo];
+    rebuildTableHeader();
+    togglePanels();
+    updateEnvBadge();
+    log("Fecha inicial seteada en hoy. Tipo inicial: Shuttle.");
+
+    // Por defecto: app bloqueada hasta login.
+    lockApp();
+    // Intentar recuperar sesión si existe y sigue vigente
+    loadSessionFromStorage();
+  })();
+</script>
+
+</body>
+</html>
